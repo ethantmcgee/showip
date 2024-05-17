@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showip-deployment
+  namespace: showip
+spec:
+  selector:
+    matchLabels:
+      app: showip
+  replicas: 1
+  template:
+    metadata:
+      labels: # labels to select/identify the deployment
+        app: showip
+    spec: # pod spec
+      containers:
+        - name: showip
+          image: ethantmcgee/showip-app:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showip-service
+  namespace: showip
+  annotations:
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5000
+  selector:
+    app: showip
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  name: showip-ingress
+  namespace: showip
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: your.domain.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: showip-service
+              servicePort: 80
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+    - hosts:
+        - your.domain.com
+      secretName: your-secret-name-tls
