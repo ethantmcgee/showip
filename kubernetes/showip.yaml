@@ -15,7 +15,7 @@ spec:
     spec: # pod spec
       containers:
         - name: showip
-          image: ethantmcgee/showip-app:latest
+          image: ethantmcgee/showip:latest
           ports:
             - containerPort: 5000
 ---
